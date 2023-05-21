@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module mem_test(input uart_rx_pin,
+module top_test(input uart_rx_pin,
                 bank_sys_clk,
                 bank_rst,
                 output uart_tx_pin,
@@ -51,26 +51,26 @@ module mem_test(input uart_rx_pin,
     
     wire [31:0]branch_base_addr,Instruction,Addr_result,link_addr;
     
-    // Ifetc32 ins_fetech(
-    // .clock(cpu_clk),
-    // .reset(~global_rst_n),
-    // .Addr_result(Addr_result),
-    // .Zero(Zero),
-    // .Read_data_1(read_data_1),
-    // .Branch(Branch),
-    // .nBranch(nBranch),
-    // .Jmp(Jmp),
-    // .Jal(Jal),
-    // .Jr(Jr),
-    // .uart_enable(uart_enable),
-    // .uart_clk(uart_clk_out),
-    // .uart_write(uart_write_enable),
-    // .uart_address(uart_address),
-    // .uart_data(uart_data_out),
-    // .Instruction(Instruction),
-    // .branch_base_addr(branch_base_addr),
-    // .link_addr(link_addr)
-    // );
+    Ifetc32 ins_fetech(
+    .clock(cpu_clk),
+    .reset(~global_rst_n),
+    .Addr_result(Addr_result),
+    .Zero(Zero),
+    .Read_data_1(read_data_1),
+    .Branch(Branch),
+    .nBranch(nBranch),
+    .Jmp(Jmp),
+    .Jal(Jal),
+    .Jr(Jr),
+    .uart_enable(uart_enable),
+    .uart_clk(uart_clk_out),
+    .uart_write(uart_write_enable),
+    .uart_address(uart_address),
+    .uart_data(uart_data_out),
+    .Instruction({16'b0,leds_pin[15:0]}),
+    .branch_base_addr(branch_base_addr),
+    .link_addr(link_addr)
+    );
     
     // control32 controler(.Opcode(Instruction[31:26]),
     // .Function_opcode(Instruction[5:0]),
@@ -120,22 +120,23 @@ module mem_test(input uart_rx_pin,
     // .reset(~global_rst_n),
     // .opcplus4(link_addr));
     
-    data_mem RAM(.clk(cpu_clk),
-    .rst_n(global_rst_n),
-    .mem_write(0),
-    .switch_in(),
-    .address({16'b0,switches_pin[15:0]}),
-    .data_in(read_data_2),
-    .led_out(),
-    .seg_out(seg_val),
-    .data_out({16'b0,leds_pin[15:0]}),
-    .uart_enable(uart_enable),
-    .uart_clk(uart_clk_out),
-    .uart_write(uart_write_enable),
-    .uart_address(uart_address),
-    .uart_data_in(uart_data_out),
-    .uart_done(uart_done)
-    );
+    
+    // data_mem RAM(.clk(cpu_clk),
+    // .rst_n(global_rst_n),
+    // .mem_write(MemWrite),
+    // .switch_in(switches_pin[15:0]),
+    // .address(ALU_result),
+    // .data_in(read_data_2),
+    // .led_out(leds_pin[15:0]),
+    // .seg_out(seg_val),
+    // .data_out(memory_data_out),
+    // .uart_enable(uart_enable),
+    // .uart_clk(uart_clk_out),
+    // .uart_write(uart_write_enable),
+    // .uart_address(uart_address),
+    // .uart_data_in(uart_data_out),
+    // .uart_done(uart_done)
+    // );
     
     uart_bmpg_0 uart(.upg_clk_i(uart_clk),
     .upg_clk_o(uart_clk_out),
@@ -155,7 +156,7 @@ module mem_test(input uart_rx_pin,
     .seg_select(seg7_bits_pin),
     .seg_out(seg7_led_pin)
     );
-    assign leds_pin[23:17] = switches_pin[23:17];
+    assign leds_pin[23:16] = switches_pin[23:16];
     assign global_rst_n    = ~bank_rst;
     
 endmodule

@@ -32,18 +32,32 @@ module top(input uart_rx_pin,
            output [23:0]leds_pin);
     // assign leds_pin = switches_pin;
     
-    wire cpu_clk,uart_clk,uart_clk_out,global_rst_n,uart_rst_p,Zero;
-    wire uart_done,uart_write_enable;
+    wire cpu_clk,uart_clk,global_rst_n,Zero;
     wire [63:0]seg_val;
-    wire [13:0]uart_address;
-    wire [31:0]uart_data_out,memory_address_in,memory_data_in,memory_data_out;
+    wire [31:0]memory_address_in,memory_data_in,memory_data_out;
     wire [1:0]ALUOp;
     wire Jr,RegDST,ALUSrc,MemtoReg,RegWrite,MemWrite,Branch,nBranch,Jmp,Jal,I_format,Sftmd;
-    wire uart_enable;
     wire[31:0]read_data_1,read_data_2,ALU_result,sign_extend;
+    wire  upg_clk_o,upg_rst;
+    wire upg_wen_o;
+    wire upg_done_o;
+    wire [14:0] upg_adr_o;
+    wire [31:0] upg_dat_o;
     
+    assign upg_rst = ~switches_pin[23];
     
-    assign uart_enable = switches_pin[23];
+    uart_bmpg_0 uart(
+    .upg_clk_i(uart_clk),
+    .upg_rst_i(upg_rst),
+    .upg_rx_i(uart_rx_pin),
+    .upg_clk_o(upg_clk_o),
+    .upg_wen_o(upg_wen_o),
+    .upg_adr_o(upg_adr_o),
+    .upg_dat_o(upg_dat_o),
+    .upg_done_o(upg_done_o),
+    .upg_tx_o(uart_tx_pin)
+    );
+    
     clk_wiz_0 clock(.clk_in1(bank_sys_clk),
     .cpu_clk(cpu_clk),
     .uart_clk(uart_clk)
@@ -62,11 +76,12 @@ module top(input uart_rx_pin,
     .Jmp(Jmp),
     .Jal(Jal),
     .Jr(Jr),
-    .uart_enable(uart_enable),
-    .uart_clk(uart_clk_out),
-    .uart_write(uart_write_enable),
-    .uart_address(uart_address),
-    .uart_data(uart_data_out),
+    .upg_rst_i(upg_rst),
+    .upg_clk_i(upg_clk_o),
+    .upg_wen_i(upg_wen_o & (!upg_adr_o[14])),
+    .upg_adr_i(upg_adr_o[13:0]),
+    .upg_dat_i(upg_dat_o),
+    .upg_done_i(upg_done_o),
     .Instruction(Instruction),
     .branch_base_addr(branch_base_addr),
     .link_addr(link_addr)
@@ -120,17 +135,6 @@ module top(input uart_rx_pin,
     .reset(~global_rst_n),
     .opcplus4(link_addr));
     
-    
-    // instruction_mem ins_mem(.clk(cpu_clk),
-    // .uart_enable(uart_enable),
-    // .uart_write(uart_write_enable),
-    // .uart_clk(uart_clk_out),
-    // .uart_address(uart_address),
-    // .uart_data(uart_data_out),
-    // .pc(pc),
-    // .instruction_out(instruction)
-    // );
-    
     data_mem RAM(.clk(cpu_clk),
     .rst_n(global_rst_n),
     .mem_write(MemWrite),
@@ -140,23 +144,12 @@ module top(input uart_rx_pin,
     .led_out(leds_pin[15:0]),
     .seg_out(seg_val),
     .data_out(memory_data_out),
-    .uart_enable(uart_enable),
-    .uart_clk(uart_clk_out),
-    .uart_write(uart_write_enable),
-    .uart_address(uart_address),
-    .uart_data_in(uart_data_out),
-    .uart_done(uart_done)
-    );
-    
-    uart_bmpg_0 uart(.upg_clk_i(uart_clk),
-    .upg_clk_o(uart_clk_out),
-    .upg_rst_i(~uart_enable),
-    .upg_wen_o(uart_write_enable),
-    .upg_adr_o(uart_address),
-    .upg_dat_o(uart_data_out),
-    .upg_done_o(uart_done),
-    .upg_rx_i(uart_rx_pin),
-    .upg_tx_o(uart_tx_pin)
+    .upg_rst_i(upg_rst),
+    .upg_clk_i(upg_clk_o),
+    .upg_wen_i(upg_wen_o & upg_adr_o[14]),
+    .upg_adr_i(upg_adr_o[13:0]),
+    .upg_dat_i(upg_dat_o),
+    .upg_done_i(upg_done_o)
     );
     
     segment seg(
@@ -166,7 +159,7 @@ module top(input uart_rx_pin,
     .seg_select(seg7_bits_pin),
     .seg_out(seg7_led_pin)
     );
-    assign leds_pin[23:17] = switches_pin[23:17];
+    assign leds_pin[23:16] = switches_pin[23:16];
     assign global_rst_n    = ~bank_rst;
     
 endmodule

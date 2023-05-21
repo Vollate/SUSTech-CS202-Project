@@ -44,7 +44,7 @@ module executs32(Read_data_1,
     assign ALU_ctl[1]  = ((!Exe_code[2]) | (!ALUOp[1]));
     assign ALU_ctl[2]  = (Exe_code[1] & ALUOp[1]) | ALUOp[0];
     assign Zero        = (alu_result_mux == 32'h0) ? 1'b1:1'b0;
-    assign Addr_Result = PC_plus_4 + (Sign_extend << 2);
+    assign Addr_Result = Jr? Read_data_1:PC_plus_4 + (Sign_extend << 2);
     
     reg [31:0] alu_result_mux;
     reg [31:0] alu;
