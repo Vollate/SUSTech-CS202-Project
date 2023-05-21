@@ -156,7 +156,7 @@ module top(input uart_rx_pin,
     .clk(cpu_clk),
     .rst_n(global_rst_n),
     .numbers(seg_val),
-    .seg_select(seg7_bits_pin),
+    .seg_select_pin(seg7_bits_pin),
     .seg_out(seg7_led_pin)
     );
     assign leds_pin[23:16] = switches_pin[23:16];

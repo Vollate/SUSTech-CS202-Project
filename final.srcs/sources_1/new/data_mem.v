@@ -22,13 +22,13 @@
 
 module data_mem(input clk,
                 rst_n,
-                mem_write,               //0 read 1 write
+                mem_write,              //0 read 1 write
                 input[15:0]switch_in,
                 input[31:0]address,
                 input[31:0]data_in,
                 output[31:0]data_out,
-                output reg[15:0]led_out,
-                output reg[63:0]seg_out,
+                output [15:0]led_out,
+                output [63:0]seg_out,
                 input upg_rst_i,
                 input upg_clk_i,
                 input upg_wen_i,
@@ -42,8 +42,10 @@ module data_mem(input clk,
     
     reg [31:0] led_cache;
     reg [63:0] seg_cache;
-    assign use_io = ~(address < 32'hFFFF_FC00);
-    wire kickOff  = upg_rst_i | (~upg_rst_i & upg_done_i);
+    assign seg_out = seg_cache;
+    assign led_out = led_cache[15:0];
+    assign use_io  = ~(address < 32'hFFFF_FC00);
+    wire kickOff   = upg_rst_i | (~upg_rst_i & upg_done_i);
     RAM ram(.clka(kickOff  ? clk: upg_clk_i),//store on negedge
     .wea(kickOff?(use_io?1'b0:mem_write):upg_wen_i),
     .addra(kick?address[15:2]:upg_adr_i),
@@ -64,26 +66,20 @@ module data_mem(input clk,
     // always@(negedge rst_n)begin
     
     // end
-    always@(*) begin
+    always@(negedge clk) begin
         if (~rst_n)begin
             led_cache <= 32'b0;
-            seg_cache <= 64'b0;
+            seg_cache <= 64'hFFFF_FFFF;
         end
-        else begin
-            if (mem_write&use_led)begin
-                led_cache = data_in[15:0];
+        else if (mem_write) begin
+            case({use_led,use_seg_1,use_seg_2})
+                3'b100:led_cache[15:0]  <= data_in;
+                3'b010:seg_cache[31:0]  <= {seg_cache[63:32],data_in};
+                3'b001:seg_cache[63:32] <= {data_in,seg_cache[31:0]};
+                default: begin
+                end
+            endcase
+        end
             end
             
-            if (mem_write&use_seg_1)begin
-                seg_cache[31:0] = data_in;
-            end
-            
-            if (mem_write&use_seg_2)begin
-                seg_cache[63:32] = data_in;
-            end
-        end
-        led_out = led_cache[15:0];
-        seg_out = seg_cache;
-    end
-    
-endmodule
+            endmodule
