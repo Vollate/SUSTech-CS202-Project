@@ -52,7 +52,7 @@ module data_mem_sim();
         #1 clk = ~clk;
     end
     initial begin
-        clk         = 1'b0;
+        clk         = 1'b1;
         rst_n       = 1'b0;
         uart_enable = 1'b0;
         #2 rst_n    = 1'b1;
@@ -60,15 +60,23 @@ module data_mem_sim();
         #2 mem_write = 1'b1;
         address      = 32'h0000_0100;
         data_in      = 32'h0000_1413;
+        #2 address   = 32'h0011_1111;
+        data_in      = 32'h2000_1000;
         #2 mem_write = 1'b0;
+        data_in      = 32'b0;
         address      = 32'h0000_0100;
         //io write test
         #2 mem_write = 1'b1;
         address      = 32'hFFFF_FC60;
         data_in      = {16'b0,16'hF0FF};
+        #2 rst_n     = 1'b0;
+        address      = 32'b0;
+        #2 rst_n     = 1'b1;
+        #2 data_in   = {16'b0,16'h0};
+        #2 data_in   = {16'b0,16'hF000};
         //io read test
         #2 switch_in = 16'hFFF0;
-        mem_write=1'b0;
+        mem_write    = 1'b0;
         address      = 32'hFFFF_FC70;
         //uart write test
         #10 $finish;

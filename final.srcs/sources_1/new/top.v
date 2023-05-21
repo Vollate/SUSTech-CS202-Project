@@ -32,8 +32,8 @@ module top(input uart_rx_pin,
            output [23:0]leds_pin);
     // assign leds_pin = switches_pin;
     
-    wire cpu_clk,uart_clk,uart_clk_out,global_rst_n,uart_rst_p,Zero,Shamt;
-    wire data_mem_write,uart_done,uart_write_enable;
+    wire cpu_clk,uart_clk,uart_clk_out,global_rst_n,uart_rst_p,Zero;
+    wire uart_done,uart_write_enable;
     wire [63:0]seg_val;
     wire [13:0]uart_address;
     wire [31:0]uart_data_out,memory_address_in,memory_data_in,memory_data_out;
@@ -49,14 +49,14 @@ module top(input uart_rx_pin,
     .uart_clk(uart_clk)
     );
     
-    wire [31:0]branch_base_addr,Instruction,Read_data_1,Addr_result,link_addr;
+    wire [31:0]branch_base_addr,Instruction,Addr_result,link_addr;
     
     Ifetc32 ins_fetech(
     .clock(cpu_clk),
-    .reset(global_rst_n),
+    .reset(~global_rst_n),
     .Addr_result(Addr_result),
     .Zero(Zero),
-    .Read_data_1(Read_data_1),
+    .Read_data_1(read_data_1),
     .Branch(Branch),
     .nBranch(nBranch),
     .Jmp(Jmp),
@@ -95,7 +95,7 @@ module top(input uart_rx_pin,
     .Function_opcode(Instruction[5:0]),
     .Exe_opcode(Instruction[31:26]),
     .ALUOp(ALUOp),
-    .Shamt(Shamt),
+    .Shamt(Instruction[10:6]),
     .Sftmd(Sftmd),
     .ALUSrc(ALUSrc),
     .I_format(I_format),
@@ -117,7 +117,7 @@ module top(input uart_rx_pin,
     .RegDst(RegDST),
     .Sign_extend(sign_extend),
     .clock(cpu_clk),
-    .reset(global_rst_n),
+    .reset(~global_rst_n),
     .opcplus4(link_addr));
     
     
@@ -132,10 +132,11 @@ module top(input uart_rx_pin,
     // );
     
     data_mem RAM(.clk(cpu_clk),
-    .rst_n(global_rst_n),.mem_write(data_mem_write),
+    .rst_n(global_rst_n),
+    .mem_write(MemWrite),
     .switch_in(switches_pin[15:0]),
-    .address(memory_address_in),
-    .data_in(ALU_result),
+    .address(ALU_result),
+    .data_in(read_data_2),
     .led_out(leds_pin[15:0]),
     .seg_out(seg_val),
     .data_out(memory_data_out),
@@ -165,7 +166,7 @@ module top(input uart_rx_pin,
     .seg_select(seg7_bits_pin),
     .seg_out(seg7_led_pin)
     );
-    assign leds_pin[23:17]  = switches_pin[23:17];
-    assign global_rst_n = ~bank_rst;
+    assign leds_pin[23:17] = switches_pin[23:17];
+    assign global_rst_n    = ~bank_rst;
     
 endmodule

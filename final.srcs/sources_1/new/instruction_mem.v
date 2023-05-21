@@ -22,7 +22,7 @@
 
 module instruction_mem(input clk,
                        uart_enable,
-                       uart_write,                   //0 read 1 writ
+                       uart_write,                   // 1 write
                        uart_clk,
                        input[13:0] uart_address,
                        input[31:0] uart_data,
@@ -33,6 +33,6 @@ module instruction_mem(input clk,
     .wea(uart_enable? uart_write:1'b0),
     .addra(uart_write?uart_address:pc[15:2]),
     .dina(uart_data),
-    .douta(ram_out)
+    .douta(instruction_out)
     );
 endmodule

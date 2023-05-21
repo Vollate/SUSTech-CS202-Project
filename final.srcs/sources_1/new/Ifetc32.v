@@ -11,7 +11,7 @@ module Ifetc32(input clock,
                input Jal,
                input Jr,
                uart_enable,
-               uart_write,                    //0 read 1 writ
+               uart_write,                    // 1 write
                uart_clk,
                input[13:0] uart_address,
                input[31:0] uart_data,
@@ -23,10 +23,10 @@ module Ifetc32(input clock,
     reg [31:0] PC, Next_PC;
     assign branch_base_addr = PC + 32'h4;
     
-    RAM ram(.clka(uart_write?uart_clk:clock),//fetch on posedge
-    .wea(uart_enable? uart_write:1'b0),
-    .addra(uart_write?uart_address:PC[15:2]),
-    .dina(uart_data),
+    ins_ram instructionRam(.clka(uart_enable?uart_clk:clock), //fetch on posedge
+    .wea(uart_enable?uart_write:1'b0),
+    .addra(uart_enable?uart_address:PC[15:2]),
+    .dina(uart_enable?uart_data:32'h0),
     .douta(Instruction)
     );
     // prgrom instmem(
@@ -46,7 +46,7 @@ module Ifetc32(input clock,
     
     
     always @(negedge clock) begin
-        if (reset == 1)
+        if (reset)
             PC <= 32'h0;
         
         else if (Jmp == 1) begin

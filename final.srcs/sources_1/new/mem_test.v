@@ -130,12 +130,14 @@ module mem_test(input uart_rx_pin,
     // .pc(pc),
     // .instruction_out(instruction)
     // );
-    
+    wire [31:0]out;
+    wire [15:0]switch_fake;
     data_mem RAM(.clk(cpu_clk),
-    .rst_n(global_rst_n),.mem_write(data_mem_write),
-    .switch_in(switches_pin[15:0]),
-    .address(32'hFFFF_FC70),
-    .data_in(ALU_result),
+    .rst_n(global_rst_n),
+    .mem_write(1'b0),
+    .switch_in(switch_fake),
+    .address({14'b0,switches_pin[15:0],2'b0}),
+    .data_in(),
     .led_out(),
     .seg_out(seg_val),
     .data_out({16'b0,leds_pin[15:0]}),

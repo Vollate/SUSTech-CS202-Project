@@ -62,23 +62,30 @@ module decode32(read_data_1,
             for(i = 0; i < 32; i = i+1) begin
                 register[i] <= 32'h0;
             end
-            end else begin
+        end
+        else begin
             if (!Jal) begin
                 for(i = 1; i < 32; i = i+1) begin
                     if (i == rt_id && RegWrite && !RegDst) begin
-                        if (MemtoReg)
+                        if (MemtoReg)begin
                             register[i] <= mem_data;
-                            if (!MemtoReg)
-                                register[i] <= ALU_result;
-                                end else if (i == rd_id && RegWrite && RegDst) begin
-                                register[i] <= ALU_result;
-                                end else
-                                register[i] <= register[i];
-                                end
-                                end else begin
-                                register[31] <= opcplus4;
-                                end
-                                end
-                                end
-                        
-                        endmodule
+                        end
+                        else begin
+                            register[i] <= ALU_result;
+                        end
+                    end
+                    else if (i == rd_id && RegWrite && RegDst) begin
+                        register[i] <= ALU_result;
+                    end
+                    else begin
+                        register[i] <= register[i];
+                    end
+                end
+            end
+            else begin
+                register[31] <= opcplus4;
+            end
+        end
+    end
+    
+endmodule
