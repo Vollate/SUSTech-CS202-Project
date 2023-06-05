@@ -3,7 +3,7 @@
 <!--                                                         -->
 <!-- Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.   -->
 
-<Project Version="7" Minor="35" Path="C:/codes/project/final/final.xpr">
+<Project Version="7" Minor="35" Path="C:/codes/cpu/project/final/final.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
     <Option Name="Id" Val="1a7c7cb7327c4f8ebf039b0ed25a36de"/>
