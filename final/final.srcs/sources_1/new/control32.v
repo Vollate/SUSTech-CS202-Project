@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 /////////////////////////////////////////////////////////////////////////////
-// Create Date: 2022/05/18 10:28:06
+// Create Date: 2023/05/18 10:28:06
 // Design Name:
 // Module Name: control32
 // Description:
